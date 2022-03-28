@@ -1,3 +1,8 @@
 # spring-jwt-demo
 
-[Reference 1] (https://www.bezkoder.com/spring-boot-jwt-authentication/)
+### References
+[JWT]
+https://www.bezkoder.com/spring-boot-jwt-authentication/
+
+[CRUD]
+https://www.bezkoder.com/react-spring-boot-crud/
