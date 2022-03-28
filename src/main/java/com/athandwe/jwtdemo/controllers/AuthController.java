@@ -16,8 +16,12 @@ import com.athandwe.jwtdemo.payload.response.JwtResponse;
 import com.athandwe.jwtdemo.payload.response.MessageResponse;
 import com.athandwe.jwtdemo.repository.RoleRepository;
 import com.athandwe.jwtdemo.repository.UserRepository;
+import com.athandwe.jwtdemo.security.jwt.AuthEntryPointJwt;
 import com.athandwe.jwtdemo.security.jwt.JwtUtils;
 import com.athandwe.jwtdemo.security.services.UserDetailsImpl;
+import io.swagger.annotations.Api;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +39,11 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@Api( tags = "Auth API's")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -54,8 +62,7 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -74,6 +81,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        logger.info(signUpRequest.toString());
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
@@ -95,8 +103,7 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
